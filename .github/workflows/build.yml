@@ -33,31 +33,37 @@ jobs:
           [ -x "$SDKMANAGER" ] || SDKMANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
           echo "Using sdkmanager: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
-          # Install the exact packages AGP 8.5 expects. The GitHub runner
-          # image already ships most of these but make sure.
           "$SDKMANAGER" "platform-tools" "platforms;android-34" "build-tools;34.0.0" > /dev/null 2>&1 || true
           echo "SDK ready:"
           ls "$ANDROID_HOME/platforms" 2>/dev/null || true
           ls "$ANDROID_HOME/build-tools" 2>/dev/null || true
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('**/*.gradle*', 'gradle-wrapper.properties') }}
-          restore-keys: gradle-
+          gradle-version: 8.9
 
-      - name: Provision gradle-wrapper.jar
+      - name: Provision gradle-wrapper.jar (best-effort)
         run: |
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            echo "Downloading gradle-wrapper.jar from upstream Gradle 8.9 release..."
+            echo "Wrapper jar missing - trying multiple sources..."
+            # Try 1: official gradle distribution
+            curl -fsSL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-8.9-bin.zip
+            unzip -p /tmp/gradle.zip "gradle-8.9/lib/gradle-wrapper-shared-*.jar" > /tmp/wrapper-shared.jar 2>/dev/null || true
+            # Try 2: extract wrapper jar from a known-good project
             curl -fsSL -o gradle/wrapper/gradle-wrapper.jar \
-              https://raw.githubusercontent.com/gradle/gradle/v8.9/gradle/wrapper/gradle-wrapper.jar
-            test -s gradle/wrapper/gradle-wrapper.jar
+              "https://raw.githubusercontent.com/gradle/gradle/v8.10.2/gradle/wrapper/gradle-wrapper.jar" \
+              || curl -fsSL -o gradle/wrapper/gradle-wrapper.jar \
+              "https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradle/wrapper/gradle-wrapper.jar" \
+              || true
+            if [ -s gradle/wrapper/gradle-wrapper.jar ]; then
+              echo "Wrapper jar provisioned via raw.githubusercontent.com"
+            else
+              rm -f gradle/wrapper/gradle-wrapper.jar
+              echo "Will use direct gradle invocation instead of wrapper."
+            fi
           fi
-          chmod +x gradlew
+          chmod +x gradlew 2>/dev/null || true
 
       - name: Provision CI signing keystore
         env:
@@ -79,7 +85,14 @@ jobs:
           fi
 
       - name: Build release APK
-        run: ./gradlew assembleRelease --no-daemon --stacktrace -x lint
+        run: |
+          if [ -f gradle/wrapper/gradle-wrapper.jar ] && [ -x ./gradlew ]; then
+            ./gradlew assembleRelease --no-daemon --stacktrace -x lint
+          else
+            echo "Falling back to direct gradle invocation."
+            gradle --version
+            gradle assembleRelease --no-daemon --stacktrace -x lint
+          fi
 
       - name: Locate APK
         id: apk
