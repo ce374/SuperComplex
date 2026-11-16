@@ -18,13 +18,23 @@ android {
         vectorDrawables { useSupportLibrary = true }
     }
 
-    signingConfig {
-        val localProps = rootProject.file("local.properties")
-        if (localProps.exists()) {
-            val props = java.util.Properties().apply { localProps.inputStream().use { load(it) } }
-            val storeFileProp = props.getProperty("signingConfig.storeFile")
-            if (storeFileProp != null) {
-                println("[SuperComplex] Using release signing config from local.properties")
+    // Read local.properties once at configuration time so the CI-generated
+    // keystore is picked up automatically without any repository secrets.
+    val localPropsFile = rootProject.file("local.properties")
+    val localProps = java.util.Properties()
+    if (localPropsFile.exists()) {
+        localProps.load(localPropsFile.inputStream())
+    }
+    val signingStoreFile = localProps.getProperty("signingConfig.storeFile")
+    val hasSigning = signingStoreFile != null
+
+    if (hasSigning) {
+        signingConfigs {
+            create("release") {
+                storeFile = rootProject.file(signingStoreFile!!)
+                storePassword = localProps.getProperty("signingConfig.storePassword")
+                keyAlias = localProps.getProperty("signingConfig.keyAlias")
+                keyPassword = localProps.getProperty("signingConfig.keyPassword")
             }
         }
     }
@@ -34,20 +44,8 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-
-            // Sign with CI keystore if local.properties provides one
-            val localProps = rootProject.file("local.properties")
-            if (localProps.exists()) {
-                val props = java.util.Properties().apply { localProps.inputStream().use { load(it) } }
-                val storeFilePath = props.getProperty("signingConfig.storeFile")
-                if (storeFilePath != null) {
-                    signingConfig = signingConfigs.create("release") {
-                        storeFile = rootProject.file(storeFilePath)
-                        storePassword = props.getProperty("signingConfig.storePassword")
-                        keyAlias = props.getProperty("signingConfig.keyAlias")
-                        keyPassword = props.getProperty("signingConfig.keyPassword")
-                    }
-                }
+            if (hasSigning) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
         debug {
@@ -70,6 +68,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/INDEX.LIST"
             excludes += "/META-INF/io.netty.versions.properties"
+            excludes += "/META-INF/DEPENDENCIES"
         }
     }
 }
@@ -89,6 +88,7 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.documentfile:documentfile:1.0.1")
+    implementation("androidx.core:core-ktx:1.13.1")
 
     // Room for tracking downloads
     implementation("androidx.room:room-runtime:2.6.1")
