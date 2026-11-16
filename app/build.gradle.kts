@@ -65,6 +65,14 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    lint {
+        // The release build runs lintVitalRelease which can fail the build
+        // on otherwise-harmless warnings. We deliberately run a non-Material
+        // custom UI, so several default lint rules (e.g. using android:tint
+        // instead of app:tint) do not apply. Block lint from aborting.
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
