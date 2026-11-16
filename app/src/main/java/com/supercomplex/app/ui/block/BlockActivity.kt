@@ -21,6 +21,7 @@ import com.supercomplex.app.download.DownloadManager
 import com.supercomplex.app.download.DownloadService
 import com.supercomplex.app.ui.channel.ChannelActivity
 import com.supercomplex.app.ui.common.SimpleTextAdapter
+import com.supercomplex.app.ui.common.SimpleTextItem
 import com.supercomplex.app.util.openUrl
 import com.supercomplex.app.util.toast
 import kotlinx.coroutines.Dispatchers
@@ -129,7 +130,7 @@ class BlockActivity : AppCompatActivity() {
                 val conns = withContext(Dispatchers.IO) { repo.blockConnections(id) }
                 b.connectionsList.adapter = SimpleTextAdapter(
                     items = conns.map {
-                        SimpleTextAdapter.Item(it.title ?: "channel", "${it.counts?.contents ?: 0} blocks · ${it.owner?.name ?: ""}")
+                        SimpleTextItem(it.title ?: "channel", "${it.counts?.contents ?: 0} blocks · ${it.owner?.name ?: ""}")
                     },
                     onClick = { idx ->
                         val c = conns[idx]
@@ -147,7 +148,7 @@ class BlockActivity : AppCompatActivity() {
                 val comments = withContext(Dispatchers.IO) { repo.blockComments(id) }
                 b.commentsList.adapter = SimpleTextAdapter(
                     items = comments.map {
-                        SimpleTextAdapter.Item(
+                        SimpleTextItem(
                             it.body?.let { stripHtml(it) } ?: "",
                             "${it.user?.name ?: "?"} · ${it.createdAt ?: ""}"
                         )

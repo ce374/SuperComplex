@@ -200,7 +200,7 @@ class DownloadManager private constructor(private val context: Context) {
     }
 
     /** Single-stream download with optional resume offset. */
-    private fun streamRange(
+    private suspend fun streamRange(
         url: String,
         startBytes: Long,
         length: Long,
@@ -249,7 +249,7 @@ class DownloadManager private constructor(private val context: Context) {
     }
 
     /** aria2-style multi-connection download using Range header. */
-    private fun multiDownload(
+    private suspend fun multiDownload(
         url: String,
         total: Long,
         dest: File,
@@ -294,7 +294,7 @@ class DownloadManager private constructor(private val context: Context) {
                                     perChunkProgress[chunk.index] = written
                                     if (written % REPORT_GRANULARITY == 0L) {
                                         val sum = perChunkProgress.sum()
-                                        updateProgress(rowId, sum, total, "RUNNING")
+                                        reportProgress(rowId, sum, total, "RUNNING")
                                     }
                                 }
                             }
@@ -322,6 +322,18 @@ class DownloadManager private constructor(private val context: Context) {
     private suspend fun updateProgress(rowId: Long, downloaded: Long, total: Long, status: String) {
         dao.progress(rowId, downloaded, total, status)
         _progress[rowId]?.value = Progress(downloaded, total, status, "")
+    }
+
+    /**
+     * Non-suspend variant for use from inside Thread lambdas (multi-connection
+     * chunk workers). Fires the DB write off on an IO coroutine and updates the
+     * StateFlow immediately so the UI sees live progress.
+     */
+    private fun reportProgress(rowId: Long, downloaded: Long, total: Long, status: String) {
+        _progress[rowId]?.value = Progress(downloaded, total, status, "")
+        kotlinx.coroutines.runBlocking(Dispatchers.IO) {
+            dao.progress(rowId, downloaded, total, status)
+        }
     }
 
     private data class Chunk(val index: Int, val start: Long, val end: Long)
