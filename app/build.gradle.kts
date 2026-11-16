@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -21,7 +23,7 @@ android {
     // Read local.properties once at configuration time so the CI-generated
     // keystore is picked up automatically without any repository secrets.
     val localPropsFile = rootProject.file("local.properties")
-    val localProps = java.util.Properties()
+    val localProps = Properties()
     if (localPropsFile.exists()) {
         localProps.load(localPropsFile.inputStream())
     }
