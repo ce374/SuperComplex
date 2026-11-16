@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="2dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Aspect-square container; the cell auto-sizes via fixed column span -->
+        <com.supercomplex.app.ui.common.SquareImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="@color/bg_image_ph" />
+
+        <View
+            android:id="@+id/typeTint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp"
+            android:gravity="center"
+            android:textSize="13sp"
+            android:textColor="@color/text_on_card"
+            android:lineSpacingExtra="2dp"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/channelOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/overlay_channel"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/channelInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/channelTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:shadowColor="#80000000"
+                android:shadowDx="0"
+                android:shadowDy="1"
+                android:shadowRadius="3" />
+
+            <TextView
+                android:id="@+id/channelCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#CCFFFFFF"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Type badge top-left -->
+        <ImageView
+            android:id="@+id/typeIcon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="6dp"
+            android:src="@drawable/ic_attachment"
+            android:visibility="gone" />
+    </FrameLayout>
+</FrameLayout>

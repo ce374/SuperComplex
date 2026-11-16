@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SuperComplex</string>
+    <string name="app_description">An Are.na client</string>
+
+    <!-- Explore filters -->
+    <string name="filter_all">All</string>
+    <string name="filter_channels">Channels</string>
+    <string name="filter_blocks">Blocks</string>
+    <string name="filter_images">Images</string>
+    <string name="filter_text">Text</string>
+    <string name="filter_links">Links</string>
+    <string name="filter_embeds">Embeds</string>
+    <string name="filter_attachments">Files</string>
+
+    <!-- Search types -->
+    <string name="search_type_all">Everything</string>
+    <string name="search_type_blocks">Blocks</string>
+    <string name="search_type_channels">Channels</string>
+
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+</resources>

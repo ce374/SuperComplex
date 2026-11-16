@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+app/build/
+.cxx/
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
+*.jks
+*.keystore
+keystore.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs / backups
+*.log
+*.orig
+*.bak
+*~
+
+# But allow CI-published APKs in public/
+!public/*.apk
